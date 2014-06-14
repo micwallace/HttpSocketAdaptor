@@ -11,7 +11,11 @@ import android.support.v4.app.NotificationCompat;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
@@ -29,7 +33,7 @@ public class RelayService extends Service {
     }
 
     @Override
-    public void onStart(Intent intent, int startId){
+    public int onStartCommand(Intent intent, int flags, int startId){
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Bundle bundle = intent.getExtras();
         sourceport = Integer.parseInt(bundle.getString("sourceport"));
@@ -38,6 +42,8 @@ public class RelayService extends Service {
         if (startRelay()) {
             createNotification(null);
         }
+
+        return START_STICKY;
     }
 
     @Override
@@ -46,8 +52,10 @@ public class RelayService extends Service {
         removeNotification();
     }
 
+    private boolean started = false;
+    private boolean even = true;
     private void createNotification(String tickertxt){
-        removeNotification();
+        //removeNotification();
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(android.R.drawable.ic_media_play)
@@ -56,10 +64,16 @@ public class RelayService extends Service {
         PendingIntent pe = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(pe);
         if (tickertxt!=null){
-            mBuilder.setTicker(tickertxt);
+            mBuilder.setTicker(tickertxt+(even?"":" ")); // a hack to make ticker show each request even though text has not changed
+            even = !even;
         }
         mBuilder.setOngoing(true);
-        mNotificationManager.notify(notifyId, mBuilder.build());
+        if (started) {
+            mNotificationManager.notify(notifyId, mBuilder.build());
+        } else {
+            startForeground(notifyId, mBuilder.build());
+            started = true;
+        }
     }
 
     private void removeNotification(){
@@ -112,9 +126,14 @@ public class RelayService extends Service {
             }
             // get the POST body
             String postBody = session.getQueryParameterString();
+            try {
+                postBody = URLDecoder.decode(postBody, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             System.out.println("Received Data: " + postBody);
             // foward to the socket
-            if (Method.POST.equals(method)) {
+            if (Method.PUT.equals(method) || Method.POST.equals(method)) {
                 if (sendSocket(postBody)){
                     createNotification("Print Job Submitted");
                 } else {
@@ -135,7 +154,7 @@ public class RelayService extends Service {
             try {
                 sock = new Socket(PRINT_IP, PRINT_PORT);
                 DataOutputStream dataOutputStream = new DataOutputStream(sock.getOutputStream());
-                dataOutputStream.writeUTF(data);
+                dataOutputStream.writeBytes(data);
                 dataOutputStream.flush();
                 try {
                     sock.close();
