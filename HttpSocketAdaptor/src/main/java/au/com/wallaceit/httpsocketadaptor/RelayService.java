@@ -124,16 +124,16 @@ public class RelayService extends Service {
                     return new Response(re.getStatus(), MIME_PLAINTEXT, re.getMessage());
                 }
             }
-            // get the POST body
-            String postBody = session.getQueryParameterString();
-            try {
-                postBody = URLDecoder.decode(postBody, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Received Data: " + postBody);
             // foward to the socket
             if (Method.PUT.equals(method) || Method.POST.equals(method)) {
+                // get the POST body
+                String postBody = session.getQueryParameterString();
+                try {
+                    postBody = URLDecoder.decode(postBody, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                // send to socket
                 if (sendSocket(postBody)){
                     createNotification("Print Job Submitted");
                 } else {
