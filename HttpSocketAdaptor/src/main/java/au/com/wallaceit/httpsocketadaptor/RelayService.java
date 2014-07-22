@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
@@ -36,9 +34,11 @@ public class RelayService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId){
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Bundle bundle = intent.getExtras();
-        sourceport = Integer.parseInt(bundle.getString("sourceport"));
-        desthost = bundle.getString("desthost");
-        destport = Integer.parseInt(bundle.getString("destport"));
+        if (bundle!=null) {
+            sourceport = Integer.parseInt(bundle.getString("sourceport"));
+            desthost = bundle.getString("desthost");
+            destport = Integer.parseInt(bundle.getString("destport"));
+        }
         if (startRelay()) {
             createNotification(null);
         }
@@ -81,7 +81,7 @@ public class RelayService extends Service {
     }
 
     private boolean startRelay(){
-        htserver = new Server();
+        htserver = new Server(RelayService.this);
         try {
             htserver.start();
             return true;
@@ -105,10 +105,18 @@ public class RelayService extends Service {
 
         public final String PRINT_IP = desthost;
         public final int PRINT_PORT = destport;
+        private Service parent;
 
-        public Server(){
-            super("0.0.0.0", sourceport);
+        public Server(Service service){
+            super("127.0.0.1", sourceport);
+            parent = service;
             System.out.println("Relay Started on port "+sourceport+"; Destination: "+desthost+":"+destport);
+        }
+
+        @Override
+        public void stop(){
+            super.stop();
+            parent.stopSelf();
         }
 
         @Override
@@ -123,9 +131,6 @@ public class RelayService extends Service {
                 } catch (ResponseException re) {
                     return new Response(re.getStatus(), MIME_PLAINTEXT, re.getMessage());
                 }
-            }
-            // foward to the socket
-            if (Method.PUT.equals(method) || Method.POST.equals(method)) {
                 // get the POST body
                 String postBody = session.getQueryParameterString();
                 try {
@@ -140,10 +145,15 @@ public class RelayService extends Service {
                     createNotification("Print Job Error!");
                 }
             }
+            if (Method.GET.equals(method)) {
+                if (session.getUri().equals("/stopserver")){
+                    this.stop();
+                }
+            }
             //return super.serve(session);
             Response response = new Response("1");
             response.addHeader("Access-Control-Allow-Origin", "*");
-            response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+            response.addHeader("Access-Control-Allow-Methods", "POST, PUT, GET");
             response.addHeader("Access-Control-Max-Age", "3600");
             response.addHeader("Access-Control-Allow-Headers", "x-requested-with");
             return response;
