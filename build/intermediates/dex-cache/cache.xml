@@ -2,13 +2,13 @@
 <pre-dex-items>
 
     <item
-        dex="/home/michael/AndroidStudioProjects/HttpSocketAdaptor/HttpSocketAdaptor/build/intermediates/pre-dexed/debug/classes-07167f18d10ca90e6e2ac8786971b230de6092bb.jar"
-        jar="/home/michael/AndroidStudioProjects/HttpSocketAdaptor/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/classes.jar"
+        dex="/home/michael/Android Projects/HttpSocketAdaptor/HttpSocketAdaptor/build/intermediates/pre-dexed/release/classes-ff635d954ec0e356e9a7d3b3b95a6abe98a4202c.jar"
+        jar="/home/michael/Android Projects/HttpSocketAdaptor/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/classes.jar"
         jumboMode="false"
         revision="19.1.0"
         sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
     <item
-        dex="/home/michael/AndroidStudioProjects/HttpSocketAdaptor/HttpSocketAdaptor/build/intermediates/pre-dexed/debug/support-v4-19.1.0-74578028015581ec3f4b04021ee8ab2be389daa7.jar"
+        dex="/home/michael/Android Projects/HttpSocketAdaptor/HttpSocketAdaptor/build/intermediates/pre-dexed/release/support-v4-19.1.0-74578028015581ec3f4b04021ee8ab2be389daa7.jar"
         jar="/home/michael/bin/android-studio/sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
         jumboMode="false"
         revision="19.1.0"
