@@ -15,7 +15,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <data android:scheme="https" android:host="wallaceit.com.au" android:pathPrefix="/httpsocketadaptor/android/" android:path="index.php" />
+                <data android:scheme="https" android:host="wallaceit.com.au" android:pathPrefix="/playstore/httpsocketadaptor/" android:path="index.php" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
