@@ -4,16 +4,26 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
     private Button serverbtn;
     private TextView stattxt;
+    private EditText desthost;
+    private EditText destport;
+    private EditText sourceport;
+    private SharedPreferences prefs;
     private boolean serverstarted =false;
 
     @Override
@@ -22,6 +32,53 @@ public class MainActivity extends Activity {
         setContentView(R.layout.fragment_main);
         serverbtn = (Button) findViewById(R.id.serverbtn);
         stattxt = (TextView) findViewById(R.id.stattxt);
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        sourceport = (EditText) findViewById(R.id.sourceport);
+        desthost = (EditText) findViewById(R.id.desthost);
+        destport = (EditText) findViewById(R.id.destport);
+        sourceport.setText(prefs.getString("prefsourceport", "8080"));
+        desthost.setText(prefs.getString("prefdesthost", "192.168.1.87"));
+        destport.setText(prefs.getString("prefdestport", "9100"));
+        sourceport.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                prefs.edit().putString("prefsourceport", sourceport.getText().toString()).apply();
+            }
+        });
+        desthost.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+                prefs.edit().putString("prefdesthost", desthost.getText().toString()).apply();
+            }
+        });
+        destport.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+                prefs.edit().putString("prefdestport", destport.getText().toString()).apply();
+            }
+        });
+
         serverstarted = isServiceRunning(RelayService.class);
         setButton(serverstarted);
     }

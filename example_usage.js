@@ -1,5 +1,8 @@
-var AndroidWebPrint = function (useHttps, checkRelay) {
+var AndroidWebPrint = function (useHttps, checkRelay, relayhost, relayport) {
         var usehttps = false;
+        var relayHost = "127.0.0.1";
+        var relayPort = "8080";
+
         this.print = function (data) {
             if (!usehttps){
                 sendHttpData(data);
@@ -19,7 +22,7 @@ var AndroidWebPrint = function (useHttps, checkRelay) {
 
         var pwindow;
         function openPrintWindow() {
-            pwindow = window.open("http://" + curset.recip + ":" + curset.rectcpport + "/printwindow", 'AndroidPrintService');
+            pwindow = window.open("http://" + relayHost + ":" + relayPort + "/printwindow", 'AndroidPrintService');
             pwindow.blur();
             window.focus();
         }
@@ -39,7 +42,7 @@ var AndroidWebPrint = function (useHttps, checkRelay) {
         };
 
         function message(event) {
-            if (event.origin != "http://" + curset.recip + ":" + curset.rectcpport)
+            if (event.origin != "http://" + relayHost + ":" + relayPort)
                 return;
             if (event.data=="init"){
                 clearTimeout(timeOut);
@@ -58,7 +61,7 @@ var AndroidWebPrint = function (useHttps, checkRelay) {
             try {
                 data = encodeURI(data);
                 var response = $.ajax({
-                    url: "http://" + curset.recip + ":" + curset.rectcpport,
+                    url: "http://" + relayHost + ":" + relayPort,
                     type: "POST",
                     data: data,
                     processData: false,
@@ -77,7 +80,7 @@ var AndroidWebPrint = function (useHttps, checkRelay) {
         function checkHttpRelay() {
             $("#printstat").show();
             $.ajax({
-                url: "http://127.0.0.1/",
+                url: "http://" + relayHost + ":" + relayPort,
                 type: "GET",
                 crossDomain: true,
                 crossOrigin: true,
@@ -90,9 +93,11 @@ var AndroidWebPrint = function (useHttps, checkRelay) {
             });
         }
 
+        if (relayhost) relayHost = relayhost;
+        if (relayport) relayPort = relayport;
         if (checkRelay) this.checkRelay();
         return this;
 };
 // usage
-var webprint = new AndroidWebPrint(true, true);
+var webprint = new AndroidWebPrint(true, true, null, null);
 webprint.print("some raw socket data");
